@@ -48,18 +48,18 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
     // Get blockchain info
     let blockchain_info = rpc.get_blockchain_info()?;
-    println!("Blockchain Info: {:?}", blockchain_info);
+    println!("Blockchain Info: {blockchain_info:?}");
 
     // Create/Load the wallets, named 'Miner' and 'Trader'. Have logic to optionally create/load them if they do not exist or not loaded already.
     create_and_or_load_wallet(&rpc, "Miner")?;
     let miner_rpc = wallet_rpc(&rpc, "Miner")?;
     let miner_rpc_info = miner_rpc.get_wallet_info()?;
-    println!("Miner wallet info: {:?}", miner_rpc_info);
+    println!("Miner wallet info: {miner_rpc_info:?}");
 
     // Generate spendable balances in the Miner wallet. How many blocks needs to be mined?
     let miner_address = generate_wallet_address(&miner_rpc, "Miner", "Mining Reward")?;
     let miner_address_info = miner_rpc.get_address_info(&miner_address)?;
-    println!("Miner address info: {:?}", miner_address_info);
+    println!("Miner address info: {miner_address_info:?}");
 
     // To get a positive balance, we need to mine more than 100 blocks.
     // This is because in regtest, the first 100 blocks are not confirmed. The rewards are not spendable and are tagged as immature.
@@ -67,26 +67,26 @@ fn main() -> bitcoincore_rpc::Result<()> {
     mine_blocks(&miner_rpc, &miner_address, 100);
     mine_blocks(&miner_rpc, &miner_address, 100);
     let miner_wallet_info = miner_rpc.get_wallet_info()?;
-    println!("Miner wallet info: {:?}", miner_wallet_info);
+    println!("Miner wallet info: {miner_wallet_info:?}");
 
     // Load Trader wallet and generate a new address
     create_and_or_load_wallet(&rpc, "Trader");
     let trader_rpc = wallet_rpc(&rpc, "Trader")?;
     let trader_rpc_info = trader_rpc.get_wallet_info()?;
-    println!("Trader wallet info: {:?}", trader_rpc_info);
+    println!("Trader wallet info: {trader_rpc_info:?}");
     let trader_address = generate_wallet_address(&trader_rpc, "Trader", "Received")?;
-    println!("Trader address: {:?}", trader_address);
+    println!("Trader address: {trader_address:?}");
 
     // Send 20 BTC from Miner to Trader
     println!("Sending 20 BTC from Miner to Trader");
     let amount = Amount::from_btc(20.0).expect("Failed to parse amount");
     let txid =
         miner_rpc.send_to_address(&trader_address, amount, None, None, None, None, None, None)?;
-    println!("Transaction ID: {:?}", txid);
+    println!("Transaction ID: {txid:?}");
 
     // Get unconfirmed transaction info from mempool
     let tx_info = miner_rpc.get_mempool_entry(&txid)?;
-    println!("Unconfirmed Transaction info: {:?}", tx_info);
+    println!("Unconfirmed Transaction info: {tx_info:?}");
 
     // Mine 1 block to confirm the transaction
     mine_blocks(&miner_rpc, &miner_address, 1);
@@ -100,11 +100,11 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!(
         "--------------------------------********************--------------------------------"
     );
-    println!("Transaction info: {:?}", tx_info);
+    println!("Transaction info: {tx_info:?}");
     println!(
         "--------------------------------********************--------------------------------"
     );
-    println!("Transaction wallet info: {:?}", tx_wallet_info);
+    println!("Transaction wallet info: {tx_wallet_info:?}");
     println!(
         "--------------------------------********************--------------------------------"
     );
@@ -123,12 +123,12 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!("Number of inputs: {}", vin.len());
     println!("Number of outputs: {}", vout.len());
     for (i, input) in vin.iter().enumerate() {
-        println!("Input {}: {:?}", i, input);
+        println!("Input {}: {input:?}", i);
     }
     for (i, output) in vout.iter().enumerate() {
-        println!("Output {}: {:?}", i, output);
-        println!("Output {} address: {:?}", i, output.script_pub_key.address);
-        println!("Output {} value: {:?}", i, output.value);
+        println!("Output {}: {output:?}", i);
+        println!("Output {} address: {output:?}", i);
+        println!("Output {} value: {output:?}", i);
     }
     println!(
         "--------------------------------********************--------------------------------"
@@ -222,17 +222,17 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
 fn create_and_or_load_wallet(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Result<()> {
     let wallets_dir = rpc.list_wallet_dir()?;
-    println!("Wallets directory: {:?}", wallets_dir);
+    println!("Wallets directory: {wallets_dir:?}");
     if (!wallets_dir.contains(&wallet_name.to_string())) {
-        println!("Wallet not found, creating wallet: {:?}", wallet_name);
+        println!("Wallet not found, creating wallet: {wallet_name:?}");
         rpc.create_wallet(wallet_name, Some(false), None, None, None)?;
     }
 
     println!("----Listing wallets----");
     let wallets = rpc.list_wallets()?;
-    println!("Wallets: {:?}", wallets);
+    println!("Wallets: {wallets:?}");
     if (!wallets.contains(&wallet_name.to_string())) {
-        println!("No loaded wallets found, loading wallet: {:?}", wallet_name);
+        println!("No loaded wallets found, loading wallet: {wallet_name:?}");
         rpc.load_wallet(wallet_name)?;
     }
     println!(
@@ -246,19 +246,13 @@ fn generate_wallet_address(
     wallet_name: &str,
     label: &str,
 ) -> bitcoincore_rpc::Result<Address> {
-    println!(
-        "Generating address for wallet: {:?} with label: {:?}",
-        wallet_name, label
-    );
+    println!("Generating address for wallet: {wallet_name:?} with label: {label:?}");
 
     let address = rpc.get_new_address(Some(label), None)?;
     let address = address
         .require_network(Network::Regtest)
         .expect("Failed to get address");
-    println!(
-        "Generated address for wallet: {:?} is {:?}",
-        wallet_name, address
-    );
+    println!("Generated address for wallet: {wallet_name:?} is {address:?}");
     println!(
         "--------------------------------********************--------------------------------"
     );
@@ -266,9 +260,9 @@ fn generate_wallet_address(
 }
 
 fn mine_blocks(rpc: &Client, address: &Address, num_blocks: u64) -> bitcoincore_rpc::Result<()> {
-    println!("Mining {} blocks to address: {:?}", num_blocks, address);
+    println!("Mining {num_blocks} blocks to address: {address:?}");
     let block_hash = rpc.generate_to_address(num_blocks, address)?;
-    println!("Block hash: {:?}", block_hash);
+    println!("Block hash: {block_hash:?}");
     println!(
         "--------------------------------********************--------------------------------"
     );
