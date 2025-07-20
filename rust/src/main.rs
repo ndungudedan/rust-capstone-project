@@ -123,12 +123,12 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!("Number of inputs: {}", vin.len());
     println!("Number of outputs: {}", vout.len());
     for (i, input) in vin.iter().enumerate() {
-        println!("Input {}: {input:?}", i);
+        println!("Input {i}: {input:?}");
     }
     for (i, output) in vout.iter().enumerate() {
-        println!("Output {}: {output:?}", i);
-        println!("Output {} address: {output:?}", i);
-        println!("Output {} value: {output:?}", i);
+        println!("Output {i}: {output:?}");
+        println!("Output {i} address: {output:?}");
+        println!("Output {i} value: {output:?}");
     }
     println!(
         "--------------------------------********************--------------------------------"
@@ -206,16 +206,16 @@ fn main() -> bitcoincore_rpc::Result<()> {
 
     // Write the data to ../out.txt in the specified format given in readme.md
     let mut file = File::create("../out.txt")?;
-    file.write_all(format!("{}\n", tx_id).as_bytes())?;
-    file.write_all(format!("{}\n", miner_input_address).as_bytes())?;
-    file.write_all(format!("{}\n", miner_input_amount).as_bytes())?;
-    file.write_all(format!("{}\n", trader_output_address).as_bytes())?;
-    file.write_all(format!("{}\n", trader_output_amount).as_bytes())?;
-    file.write_all(format!("{}\n", miner_change_address).as_bytes())?;
-    file.write_all(format!("{}\n", miner_change_amount).as_bytes())?;
-    file.write_all(format!("{}\n", tx_fees.unwrap_or_default().to_btc()).as_bytes())?;
-    file.write_all(format!("{}\n", tx_block_height).as_bytes())?;
-    file.write_all(format!("{}\n", tx_block_hash).as_bytes())?;
+    file.write_all(format!("{tx_id}\n").as_bytes())?;
+    file.write_all(format!("{miner_input_address}\n").as_bytes())?;
+    file.write_all(format!("{miner_input_amount}\n").as_bytes())?;
+    file.write_all(format!("{trader_output_address}\n").as_bytes())?;
+    file.write_all(format!("{trader_output_amount}\n").as_bytes())?;
+    file.write_all(format!("{miner_change_address}\n").as_bytes())?;
+    file.write_all(format!("{miner_change_amount}\n").as_bytes())?;
+    file.write_all(format!("{tx_fees:?}\n").as_bytes())?;
+    file.write_all(format!("{tx_block_height}\n").as_bytes())?;
+    file.write_all(format!("{tx_block_hash}\n").as_bytes())?;
 
     Ok(())
 }
