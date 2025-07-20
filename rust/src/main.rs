@@ -82,7 +82,8 @@ fn main() -> bitcoincore_rpc::Result<()> {
     // Send 20 BTC from Miner to Trader
     println!("Sending 20 BTC from Miner to Trader");
     let amount = Amount::from_btc(20.0).expect("Failed to parse amount");
-    let txid = miner_rpc.send_to_address(&trader_address, amount, None, None, None, None, None, None)?;
+    let txid =
+        miner_rpc.send_to_address(&trader_address, amount, None, None, None, None, None, None)?;
     println!("Transaction ID: {:?}", txid);
 
     // Get unconfirmed transaction info from mempool
@@ -97,23 +98,29 @@ fn main() -> bitcoincore_rpc::Result<()> {
     let tx_data = tx_result.transaction().unwrap();
     let tx_info = miner_rpc.decode_raw_transaction(&tx_data, None)?;
     let tx_wallet_info = tx_result.info;
-    
-    println!("--------------------------------********************--------------------------------");
+
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     println!("Transaction info: {:?}", tx_info);
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     println!("Transaction wallet info: {:?}", tx_wallet_info);
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
 
     // Extract transaction details from the decoded transaction
     let tx_id = tx_data.txid();
     let tx_fees = tx_result.fee;
     let tx_block_height = tx_wallet_info.blockheight.unwrap_or(0);
     let tx_block_hash = tx_wallet_info.blockhash.expect("Block hash not found");
-    
+
     // Parse the decoded transaction to extract input/output details
     let vin = &tx_info.vin;
     let vout = &tx_info.vout;
-    
+
     // Debug: Print transaction structure
     println!("Number of inputs: {}", vin.len());
     println!("Number of outputs: {}", vout.len());
@@ -125,31 +132,35 @@ fn main() -> bitcoincore_rpc::Result<()> {
         println!("Output {} address: {:?}", i, output.script_pub_key.address);
         println!("Output {} value: {:?}", i, output.value);
     }
-    println!("--------------------------------********************--------------------------------");
-    
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
+
     // Calculate total input amount from all inputs
     let mut total_input_amount = Amount::ZERO;
     let mut miner_input_address = String::new();
-    
+
     // Use the first input for the address (they should all be from the miner)
     let first_input = &vin[0];
     let prev_tx = first_input.txid.as_ref().unwrap();
     let vout_index = first_input.vout.unwrap();
-    
+
     // Get the previous transaction to find the miner's input address
     let prev_tx_result = miner_rpc.get_transaction(prev_tx, None)?;
     let prev_tx_data = prev_tx_result.transaction().unwrap();
     let prev_tx_info = miner_rpc.decode_raw_transaction(&prev_tx_data, None)?;
     let prev_vout = &prev_tx_info.vout;
     let prev_output = &prev_vout[vout_index as usize];
-    
+
     // Get the address from the first input
     miner_input_address = if let Some(addr) = &prev_output.script_pub_key.address {
-        addr.clone().require_network(Network::Regtest).unwrap().to_string()
+        addr.clone()
+            .require_network(Network::Regtest)
+            .unwrap()
+            .to_string()
     } else {
         "Unknown".to_string()
     };
-    
 
     // Calculate total input amount from all inputs
     for input in vin {
@@ -162,24 +173,30 @@ fn main() -> bitcoincore_rpc::Result<()> {
             total_input_amount += input_output.value;
         }
     }
-    
+
     let miner_input_amount = total_input_amount;
-    
+
     // Extract output details - handle case where there might be only one output
     let trader_output = &vout[0]; // First output (20 BTC to trader)
-    
+
     let trader_output_address = if let Some(addr) = &trader_output.script_pub_key.address {
-        addr.clone().require_network(Network::Regtest).unwrap().to_string()
+        addr.clone()
+            .require_network(Network::Regtest)
+            .unwrap()
+            .to_string()
     } else {
         "Unknown".to_string()
     };
     let trader_output_amount = trader_output.value;
-    
+
     // Handle change output - might not exist if exact amount was sent
     let (miner_change_address, miner_change_amount) = if vout.len() > 1 {
         let miner_change_output = &vout[1]; // Second output (change back to miner)
         let change_address = if let Some(addr) = &miner_change_output.script_pub_key.address {
-            addr.clone().require_network(Network::Regtest).unwrap().to_string()
+            addr.clone()
+                .require_network(Network::Regtest)
+                .unwrap()
+                .to_string()
         } else {
             "Unknown".to_string()
         };
@@ -188,7 +205,6 @@ fn main() -> bitcoincore_rpc::Result<()> {
         // No change output - use the same address as input but with 0 amount
         (miner_input_address.clone(), Amount::ZERO)
     };
-
 
     // Write the data to ../out.txt in the specified format given in readme.md
     let mut file = File::create("../out.txt")?;
@@ -206,15 +222,10 @@ fn main() -> bitcoincore_rpc::Result<()> {
     Ok(())
 }
 
-
-fn create_and_or_load_wallet(
-    rpc: &Client,
-    wallet_name: &str,
-) -> bitcoincore_rpc::Result<()> {
-
+fn create_and_or_load_wallet(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Result<()> {
     let wallets_dir = rpc.list_wallet_dir()?;
     println!("Wallets directory: {:?}", wallets_dir);
-    if(!wallets_dir.contains(&wallet_name.to_string())) {
+    if (!wallets_dir.contains(&wallet_name.to_string())) {
         println!("Wallet not found, creating wallet: {:?}", wallet_name);
         rpc.create_wallet(wallet_name, Some(false), None, None, None)?;
     }
@@ -226,7 +237,9 @@ fn create_and_or_load_wallet(
         println!("No loaded wallets found, loading wallet: {:?}", wallet_name);
         rpc.load_wallet(wallet_name)?;
     }
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     Ok(())
 }
 
@@ -235,14 +248,22 @@ fn generate_wallet_address(
     wallet_name: &str,
     label: &str,
 ) -> bitcoincore_rpc::Result<Address> {
-    println!("Generating address for wallet: {:?} with label: {:?}", wallet_name, label);
-    
+    println!(
+        "Generating address for wallet: {:?} with label: {:?}",
+        wallet_name, label
+    );
+
     let address = rpc.get_new_address(Some(label), None)?;
     let address = address
         .require_network(Network::Regtest)
         .expect("Failed to get address");
-    println!("Generated address for wallet: {:?} is {:?}", wallet_name, address);
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "Generated address for wallet: {:?} is {:?}",
+        wallet_name, address
+    );
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     Ok(address)
 }
 
@@ -250,7 +271,9 @@ fn mine_blocks(rpc: &Client, address: &Address, num_blocks: u64) -> bitcoincore_
     println!("Mining {} blocks to address: {:?}", num_blocks, address);
     let block_hash = rpc.generate_to_address(num_blocks, address)?;
     println!("Block hash: {:?}", block_hash);
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     Ok(())
 }
 
@@ -259,6 +282,8 @@ fn wallet_rpc(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Result<Client
         &format!("{}/wallet/{}", RPC_URL, wallet_name),
         Auth::UserPass(RPC_USER.to_owned(), RPC_PASS.to_owned()),
     )?;
-    println!("--------------------------------********************--------------------------------");
+    println!(
+        "--------------------------------********************--------------------------------"
+    );
     Ok(wallet_rpc)
 }
