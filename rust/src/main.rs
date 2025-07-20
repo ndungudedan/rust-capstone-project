@@ -206,6 +206,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
     Ok(())
 }
 
+
 fn create_and_or_load_wallet(
     rpc: &Client,
     wallet_name: &str,
