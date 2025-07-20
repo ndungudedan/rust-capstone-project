@@ -271,7 +271,7 @@ fn mine_blocks(rpc: &Client, address: &Address, num_blocks: u64) -> bitcoincore_
 
 fn wallet_rpc(rpc: &Client, wallet_name: &str) -> bitcoincore_rpc::Result<Client> {
     let wallet_rpc = Client::new(
-        &format!("{}/wallet/{}", RPC_URL, wallet_name),
+        &format!("{RPC_URL}/wallet/{wallet_name}"),
         Auth::UserPass(RPC_USER.to_owned(), RPC_PASS.to_owned()),
     )?;
     println!(
