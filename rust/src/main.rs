@@ -51,8 +51,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!("Blockchain Info: {:?}", blockchain_info);
 
     // Create/Load the wallets, named 'Miner' and 'Trader'. Have logic to optionally create/load them if they do not exist or not loaded already.
-    let miner_wallet_info = create_and_or_load_wallet(&rpc, "Miner")?;
-    println!("Miner wallet info: {:?}", miner_wallet_info);
+    create_and_or_load_wallet(&rpc, "Miner")?;
     let miner_rpc = wallet_rpc(&rpc, "Miner")?;
     let miner_rpc_info = miner_rpc.get_wallet_info()?;
     println!("Miner wallet info: {:?}", miner_rpc_info);
@@ -65,14 +64,13 @@ fn main() -> bitcoincore_rpc::Result<()> {
     // To get a positive balance, we need to mine more than 100 blocks.
     // This is because in regtest, the first 100 blocks are not confirmed. The rewards are not spendable and are tagged as immature.
     // Mining multiple blocks confirms the previous block transactions thus our coinbase transaction balance also gets confirmed.
-    let _ = mine_blocks(&miner_rpc, &miner_address, 100)?;
-    let _ = mine_blocks(&miner_rpc, &miner_address, 100)?;
+    mine_blocks(&miner_rpc, &miner_address, 100);
+    mine_blocks(&miner_rpc, &miner_address, 100);
     let miner_wallet_info = miner_rpc.get_wallet_info()?;
     println!("Miner wallet info: {:?}", miner_wallet_info);
 
     // Load Trader wallet and generate a new address
-    let trader_wallet_info = create_and_or_load_wallet(&rpc, "Trader")?;
-    println!("Trader wallet info: {:?}", trader_wallet_info);
+    create_and_or_load_wallet(&rpc, "Trader");
     let trader_rpc = wallet_rpc(&rpc, "Trader")?;
     let trader_rpc_info = trader_rpc.get_wallet_info()?;
     println!("Trader wallet info: {:?}", trader_rpc_info);
@@ -91,7 +89,7 @@ fn main() -> bitcoincore_rpc::Result<()> {
     println!("Unconfirmed Transaction info: {:?}", tx_info);
 
     // Mine 1 block to confirm the transaction
-    let _ = mine_blocks(&miner_rpc, &miner_address, 1)?;
+    mine_blocks(&miner_rpc, &miner_address, 1);
 
     // Extract all required transaction details
     let tx_result = miner_rpc.get_transaction(&txid, None)?;
